@@ -165,3 +165,9 @@ Users can share their progress with friends and challenge each other to maintain
 🔹 Create a roadmap for v2 or additional features  
 
 ---
+
+## Backend deployment link:-
+
+https://s64-krish-jain-capstone-habitquest-1-1qd8.onrender.com
+
+---

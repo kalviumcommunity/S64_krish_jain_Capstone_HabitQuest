@@ -32,6 +32,7 @@ router.get("/top/:n", async (req, res) => {
     if (isNaN(limit) || limit <= 0) {
       return res.status(400).json({ error: "Invalid number. Please provide a positive integer." });
     }
+
     try {
       const topUsers = await Leaderboard.find()
         .populate("userId", "name email")
@@ -43,4 +44,5 @@ router.get("/top/:n", async (req, res) => {
       res.status(500).json({ error: "Something went wrong while fetching leaderboard data." });
     }
   });
+  
 module.exports = router;

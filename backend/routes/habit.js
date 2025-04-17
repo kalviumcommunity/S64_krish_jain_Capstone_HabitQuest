@@ -51,4 +51,20 @@ router.post("/user/:userId", async (req, res) => {
     res.status(500).json({ error: "Failed to create habit for user" });
   }
 });
+router.put("/:id", async (req, res) => {
+  try {
+    const { title, frequency } = req.body;
+    const updatedHabit = await Habit.findByIdAndUpdate(
+      req.params.id,
+      { title, frequency },
+      { new: true }
+    );
+    if (!updatedHabit) {
+      return res.status(404).json({ message: "Habit not found" });
+    }
+    res.status(200).json(updatedHabit);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 module.exports = router;

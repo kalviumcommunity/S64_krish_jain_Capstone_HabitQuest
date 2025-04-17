@@ -19,9 +19,13 @@ mongoose
 
 const habitRoutes = require("./routes/habit");
 const userRoutes = require("./routes/user");
+const leaderboardRoutes = require("./routes/leaderboard");
+const reminderRoutes = require("./routes/reminder");
 
 app.use("/api/habits", habitRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/reminders", reminderRoutes);
 
 app.get("/", (req, res) => {
   res.send("🏹 Welcome to HabitQuest API");

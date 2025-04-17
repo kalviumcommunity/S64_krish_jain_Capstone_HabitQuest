@@ -44,5 +44,20 @@ router.get("/top/:n", async (req, res) => {
       res.status(500).json({ error: "Something went wrong while fetching leaderboard data." });
     }
   });
-
+  router.put("/:userId", async (req, res) => {
+    try {
+      const { totalStreaks } = req.body;
+      const updatedEntry = await Leaderboard.findOneAndUpdate(
+        { userId: req.params.userId },
+        { totalStreaks },
+        { new: true }
+      );
+      if (!updatedEntry) {
+        return res.status(404).json({ message: "Leaderboard entry not found" });
+      }
+      res.status(200).json(updatedEntry);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 module.exports = router;

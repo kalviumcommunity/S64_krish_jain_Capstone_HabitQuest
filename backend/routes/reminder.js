@@ -77,4 +77,20 @@ router.post("/user/:userId", async (req, res) => {
     res.status(500).json({ error: "Failed to create reminder for user" });
   }
 });
+router.put("/:id", async (req, res) => {
+  try {
+    const { message, time } = req.body;
+    const updatedReminder = await Reminder.findByIdAndUpdate(
+      req.params.id,
+      { message, time },
+      { new: true }
+    );
+    if (!updatedReminder) {
+      return res.status(404).json({ message: "Reminder not found" });
+    }
+    res.status(200).json(updatedReminder);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 module.exports = router;

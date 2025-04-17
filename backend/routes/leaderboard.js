@@ -39,10 +39,10 @@ router.get("/top/:n", async (req, res) => {
         .sort({ totalStreaks: -1 })
         .limit(limit);
       res.status(200).json(topUsers);
-    } catch (error) {
-      console.error("❌ Error fetching top users:", error.message);
+    } catch (err) {
+      console.error("❌ Error fetching top users:", err.message);
       res.status(500).json({ error: "Something went wrong while fetching leaderboard data." });
     }
   });
-  
+
 module.exports = router;

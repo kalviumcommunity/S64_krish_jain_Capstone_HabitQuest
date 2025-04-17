@@ -25,9 +25,13 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const newUser = new User({ name, email, password });
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
-    res.status(201).json(newUser);
+    res.status(201).json({ message: "User created successfully", user: newUser });
   } catch (error) {
     console.error("❌ Error creating user:", error.message);
     res.status(500).json({ error: "Failed to create user" });

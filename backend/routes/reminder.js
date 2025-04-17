@@ -47,4 +47,28 @@ router.get("/habit/:habitId", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+router.post("/", async (req, res) => {
+  try {
+    const { userId, habitId, message, time } = req.body;
+    const newReminder = new Reminder({ userId, habitId, message, time });
+    await newReminder.save();
+    res.status(201).json(newReminder);
+  } catch (error) {
+    console.error("❌ Error creating reminder:", error.message);
+    res.status(500).json({ error: "Failed to create reminder" });
+  }
+});
+router.post("/user/:userId", async (req, res) => {
+  try {
+    const { habitId, message, time } = req.body;
+    const { userId } = req.params;
+
+    const reminder = new Reminder({ userId, habitId, message, time });
+    await reminder.save();
+    res.status(201).json(reminder);
+  } catch (error) {
+    console.error("❌ Error creating reminder for user:", error.message);
+    res.status(500).json({ error: "Failed to create reminder for user" });
+  }
+});
 module.exports = router;

@@ -27,4 +27,28 @@ router.get("/user/:userId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+router.post("/", async (req, res) => {
+  try {
+    const { title, description, userId } = req.body;
+    const newHabit = new Habit({ title, description, userId });
+    await newHabit.save();
+    res.status(201).json(newHabit);
+  } catch (error) {
+    console.error("❌ Error creating habit:", error.message);
+    res.status(500).json({ error: "Failed to create habit" });
+  }
+});
+router.post("/user/:userId", async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    const { userId } = req.params;
+
+    const newHabit = new Habit({ title, description, userId });
+    await newHabit.save();
+    res.status(201).json(newHabit);
+  } catch (error) {
+    console.error("❌ Error creating habit for user:", error.message);
+    res.status(500).json({ error: "Failed to create habit for user" });
+  }
+});
 module.exports = router;

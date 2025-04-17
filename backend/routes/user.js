@@ -21,4 +21,17 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user. Please try again later." });
   }
 });
+
+router.post("/", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const newUser = new User({ name, email, password });
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error("❌ Error creating user:", error.message);
+    res.status(500).json({ error: "Failed to create user" });
+  }
+});
+
 module.exports = router;

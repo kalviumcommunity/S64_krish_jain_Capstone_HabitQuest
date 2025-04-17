@@ -47,4 +47,28 @@ router.get("/user/:userId/habit/:habitId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+router.post("/", async (req, res) => {
+  try {
+    const { userId, habitId, currentStreak, lastChecked } = req.body;
+    const newStreak = new Streak({ userId, habitId, currentStreak, lastChecked });
+    await newStreak.save();
+    res.status(201).json(newStreak);
+  } catch (error) {
+    console.error("❌ Error creating streak:", error.message);
+    res.status(500).json({ error: "Failed to create streak" });
+  }
+});
+router.post("/user/:userId/habit/:habitId", async (req, res) => {
+  try {
+    const { currentStreak, lastChecked } = req.body;
+    const { userId, habitId } = req.params;
+
+    const newStreak = new Streak({ userId, habitId, currentStreak, lastChecked });
+    await newStreak.save();
+    res.status(201).json(newStreak);
+  } catch (error) {
+    console.error("❌ Error creating streak:", error.message);
+    res.status(500).json({ error: "Failed to create streak" });
+  }
+});
 module.exports = router;

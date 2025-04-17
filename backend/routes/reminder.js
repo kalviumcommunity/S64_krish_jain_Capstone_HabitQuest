@@ -50,9 +50,15 @@ router.get("/habit/:habitId", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { userId, habitId, message, time } = req.body;
+    if (!userId || !habitId || !message || !time) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+    if (isNaN(Date.parse(time))) {
+      return res.status(400).json({ error: "Invalid time format." });
+    }
     const newReminder = new Reminder({ userId, habitId, message, time });
     await newReminder.save();
-    res.status(201).json(newReminder);
+    res.status(201).json({ message: "Reminder created", reminder: newReminder });
   } catch (error) {
     console.error("❌ Error creating reminder:", error.message);
     res.status(500).json({ error: "Failed to create reminder" });

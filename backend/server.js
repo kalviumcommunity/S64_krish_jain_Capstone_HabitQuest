@@ -1,4 +1,3 @@
-// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -6,11 +5,11 @@ require("dotenv").config();
 
 const app = express();
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
+
 mongoose
 .connect(process.env.MONGO_URI)
 .then(() => {
@@ -18,6 +17,21 @@ mongoose
 })
 .catch((err) => console.error("❌ DB connection failed:", err));
 
+const habitRoutes = require("./routes/habit");
+const userRoutes = require("./routes/user");
+
+app.use("/api/habits", habitRoutes);
+app.use("/api/users", userRoutes);
+
+app.get("/", (req, res) => {
+  res.send("🏹 Welcome to HabitQuest API");
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Endpoint not found" });
+});
 
 const PORT = process.env.PORT;
-app.listen(PORT, () => console.log(`🚀 Server running on port http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});

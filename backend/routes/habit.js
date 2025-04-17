@@ -54,6 +54,12 @@ router.post("/user/:userId", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { title, frequency } = req.body;
+    if (!title || typeof title !== "string") {
+      return res.status(400).json({ error: "Title must be a non-empty string" });
+    }
+    if (!frequency || !["daily", "weekly", "monthly"].includes(frequency)) {
+      return res.status(400).json({ error: "Frequency must be 'daily', 'weekly', or 'monthly'" });
+    }
     const updatedHabit = await Habit.findByIdAndUpdate(
       req.params.id,
       { title, frequency },
@@ -64,7 +70,9 @@ router.put("/:id", async (req, res) => {
     }
     res.status(200).json(updatedHabit);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("❌ Error updating habit:", error.message);
+    res.status(500).json({ error: "Failed to update habit" });
   }
 });
+
 module.exports = router;

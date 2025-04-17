@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ error: "All fields are required." });
     }
-    const hashedPassword = await bcryptjs.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
     res.status(201).json({ message: "User created successfully", user: newUser });

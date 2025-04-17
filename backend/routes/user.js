@@ -12,10 +12,13 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate("habits");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user); 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("❌ Error fetching user:", err.message);
+    res.status(500).json({ error: "Failed to fetch user. Please try again later." });
   }
 });
 module.exports = router;

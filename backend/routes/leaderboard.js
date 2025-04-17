@@ -27,14 +27,20 @@ router.get("/user/:userId", async (req, res) => {
 });
 
 router.get("/top/:n", async (req, res) => {
-  const limit = parseInt(req.params.n);
-  try {
-    const topUsers = await Leaderboard.find()
-      .populate("userId", "name email")
-      .sort({ totalStreaks: -1 })
-      .limit(limit);
-    res.status(200).json(topUsers);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    const n = req.params.n;
+    const limit = parseInt(n);
+    if (isNaN(limit) || limit <= 0) {
+      return res.status(400).json({ error: "Invalid number. Please provide a positive integer." });
+    }
+    try {
+      const topUsers = await Leaderboard.find()
+        .populate("userId", "name email")
+        .sort({ totalStreaks: -1 })
+        .limit(limit);
+      res.status(200).json(topUsers);
+    } catch (error) {
+      console.error("❌ Error fetching top users:", error.message);
+      res.status(500).json({ error: "Something went wrong while fetching leaderboard data." });
+    }
+  });
+module.exports = router;

@@ -17,17 +17,19 @@ mongoose
 })
 .catch((err) => console.error("❌ DB connection failed:", err));
 
-const habitRoutes = require("./routes/habit");
-const userRoutes = require("./routes/user");
+const habitRoutes = require("./routes/habits");
+const userRoutes = require("./routes/users");
 const leaderboardRoutes = require("./routes/leaderboard");
 const reminderRoutes = require("./routes/reminder");
-const streakRoutes = require("./routes/streak");
+const streakRoutes = require("./routes/streaks");
+const friendRoutes = require("./routes/friend");
 
 app.use("/api/habits", habitRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/streaks", streakRoutes);
+app.use("/api/friends", friendRoutes);
 
 app.get("/", (req, res) => {
   res.send("🏹 Welcome to HabitQuest API");

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+
 router.get("/", async (req, res) => {
   try {
     const users = await User.find().populate("habits");
@@ -10,6 +11,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate("habits");
@@ -38,6 +40,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Failed to create user" });
   }
 });
+
 router.put("/:id", async (req, res) => {
   try {
     const { name, email } = req.body;
@@ -54,4 +57,46 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.put("/:id/password", async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("❌ Error updating password:", error.message);
+    res.status(500).json({ error: "Failed to update password" });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting account:", error.message);
+    res.status(500).json({ error: "Failed to delete account" });
+  }
+});
+
 module.exports = router;

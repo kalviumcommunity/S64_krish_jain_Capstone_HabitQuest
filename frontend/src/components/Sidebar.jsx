@@ -9,11 +9,11 @@ import {
 } from "lucide-react";
 
 const Sidebar = () => {
-  const location = useLocation();
+  const location = useLocation(); 
   const navigate = useNavigate();
 
   const navItems = [
-    { label: "Habits", icon: <Swords size={20} />, path: "/habits" },
+    { label: "Habits", icon: <Swords size={20} />, path: "/dashboard" },
     { label: "Progress", icon: <BarChart3 size={20} />, path: "/progress" },
     { label: "Reminders", icon: <AlarmClock size={20} />, path: "/reminders" },
     { label: "Leaderboard", icon: <Trophy size={20} />, path: "/leaderboard" }

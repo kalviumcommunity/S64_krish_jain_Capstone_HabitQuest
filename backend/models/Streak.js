@@ -5,25 +5,37 @@ const streakSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User", 
     required: true 
-  }, habitId: { 
+  },
+  habitId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Habit", 
     required: true 
-  }, currentStreak: { 
+  },
+  currentStreak: { 
     type: Number, 
     default: 0 
-  }, longestStreak: { 
+  },
+  longestStreak: { 
     type: Number, 
     default: 0 
-  }, lastCompleted: { 
+  },
+  lastCompletedDate: { 
     type: Date 
   },
-  streakHistory: [
-    {
-      date: { type: Date }, success: { type: Boolean }
-    }
-  ]
+  milestones: {
+    weekly: { type: Boolean, default: false },
+    monthly: { type: Boolean, default: false }
+  },
+  streakHistory: [{
+    date: { type: Date },
+    completed: { type: Boolean },
+    streakCount: { type: Number }
+  }]
 }, {
-  timestamps: true,
+  timestamps: true
 });
+
+// Add index for efficient querying
+streakSchema.index({ userId: 1, habitId: 1 }, { unique: true });
+
 module.exports = mongoose.model("Streak", streakSchema);

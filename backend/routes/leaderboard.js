@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Leaderboard = require("../models/Leaderboard");
+const auth = require("../middleware/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     const leaderboard = await Leaderboard.find()
       .populate("userId", "name email") 

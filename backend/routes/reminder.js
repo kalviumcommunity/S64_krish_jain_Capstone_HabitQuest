@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Reminder = require("../models/Reminder");
+const auth = require("../middleware/auth");
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
     try {
       const reminders = await Reminder.find()
         .populate("userId", "name email")

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const auth = require("../middleware/auth");
 
 // Get user's friends
-router.get("/:userId/friends", async (req, res) => {
+router.get("/:userId/friends", auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).populate("friends");
     if (!user) {

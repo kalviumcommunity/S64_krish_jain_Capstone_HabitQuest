@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Streak = require('../models/Streak');
 const Habit = require('../models/Habit');
-const { isAuthenticated } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
 // Helper function to check if two dates are consecutive
 const isConsecutiveDay = (date1, date2) => {
@@ -14,7 +14,7 @@ const isConsecutiveDay = (date1, date2) => {
 };
 
 // Get streak information for a habit
-router.get('/:habitId', isAuthenticated, async (req, res) => {
+router.get('/:habitId', auth, async (req, res) => {
   try {
     const streak = await Streak.findOne({
       userId: req.user._id,
@@ -32,7 +32,7 @@ router.get('/:habitId', isAuthenticated, async (req, res) => {
 });
 
 // Update streak for a habit
-router.post('/:habitId/update', isAuthenticated, async (req, res) => {
+router.post('/:habitId/update', auth, async (req, res) => {
   try {
     const habit = await Habit.findOne({
       _id: req.params.habitId,
@@ -124,7 +124,7 @@ router.post('/:habitId/update', isAuthenticated, async (req, res) => {
 });
 
 // Get all streaks for user
-router.get('/', isAuthenticated, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const streaks = await Streak.find({ userId: req.user._id })
       .populate('habitId', 'name');

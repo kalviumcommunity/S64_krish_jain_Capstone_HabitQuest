@@ -11,17 +11,17 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     
     if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
+      return res.status(400).json({ error: "Please provide both email and password" });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "We couldn't find an account with that email. Please check your email or sign up if you're new!" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "The password you entered is incorrect. Please try again." });
     }
 
     const token = jwt.sign(
@@ -41,7 +41,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Login error:", error.message);
-    res.status(500).json({ error: "Login failed" });
+    res.status(500).json({ error: "An error occurred. Please try again later." });
   }
 });
 
@@ -82,16 +82,50 @@ router.get("/:id", auth, async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    
+    // Validate required fields
     if (!name || !email || !password) {
-      return res.status(400).json({ error: "All fields are required." });
+      return res.status(400).json({ error: "Please provide all required fields" });
     }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "This email is already registered. Please try logging in instead." });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
-    res.status(201).json({ message: "User created successfully", user: newUser });
+    
+    // Generate token for the new user
+    const token = jwt.sign(
+      { userId: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(201).json({ 
+      message: "Welcome to HabitQuest! Your account has been created successfully.",
+      token,
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        profilePicture: newUser.profilePicture
+      }
+    });
   } catch (error) {
     console.error("❌ Error creating user:", error.message);
-    res.status(500).json({ error: "Failed to create user" });
+    if (error.code === 11000) { // MongoDB duplicate key error
+      return res.status(400).json({ error: "This email is already registered. Please try logging in instead." });
+    }
+    res.status(500).json({ error: "Failed to create account. Please try again later." });
   }
 });
 

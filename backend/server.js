@@ -17,8 +17,8 @@ mongoose
 })
 .catch((err) => console.error("❌ DB connection failed:", err));
 
-const habitRoutes = require("./routes/habits");
-const userRoutes = require("./routes/users");
+const habitRoutes = require("./routes/habit");
+const userRoutes = require("./routes/user");
 const leaderboardRoutes = require("./routes/leaderboard");
 const reminderRoutes = require("./routes/reminder");
 const streakRoutes = require("./routes/streaks");

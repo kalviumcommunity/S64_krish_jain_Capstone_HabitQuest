@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from "../assets/logo.png"
-import { registerUser } from '../utils/api';
+import { registerUser, setCurrentUser } from '../utils/api';
 
 const QuestSignupForm = () => {
   const navigate = useNavigate();
@@ -51,9 +51,8 @@ const QuestSignupForm = () => {
 
     try {
       const data = await registerUser(formData.heroName, formData.email, formData.password);
-      // Store the token and user data
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Store user data in memory
+      setCurrentUser(data.user);
       // Redirect to dashboard after successful registration
       navigate('/dashboard');
     } catch (error) {

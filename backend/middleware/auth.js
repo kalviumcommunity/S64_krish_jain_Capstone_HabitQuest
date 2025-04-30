@@ -6,6 +6,7 @@ const auth = async (req, res, next) => {
   try {
     const token = req.cookies.token;
     
+    
     if (!token) {
       logger.warn('Authentication failed: No token provided', {
         path: req.path,

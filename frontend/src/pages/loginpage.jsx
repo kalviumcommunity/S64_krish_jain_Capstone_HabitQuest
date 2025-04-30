@@ -1,10 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from "../assets/logo.png"
+import { loginUser } from '../utils/api';
 
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   // State to track which form is currently active
   const [activeForm, setActiveForm] = useState('login');
   // Form data states
@@ -17,6 +19,8 @@ const LoginPage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const modalRefs = useRef({});
 
@@ -65,10 +69,21 @@ const LoginPage = () => {
     resetPasswordFields();
   };
 
-  const handleContinueQuest = (e) => {
+  const handleContinueQuest = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Logging in with:', { email, password });
+    setError('');
+    setLoading(true);
+
+    try {
+      await loginUser(email, password);
+      // Redirect to dashboard on successful login
+      navigate('/dashboard');
+    } catch (error) {
+      // Display the error message directly from the backend
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleContinueWithGoogle = (e) => {
@@ -122,7 +137,13 @@ const LoginPage = () => {
           <h2 className="text-2xl font-bold text-center mb-2">Welcome back, Hero!</h2>
           <p className="text-center text-gray-600 mb-6">Continue your quest for better habits</p>
           
-          <form>
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleContinueQuest}>
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Quest Scroll (Email)</label>
               <input 
@@ -170,10 +191,10 @@ const LoginPage = () => {
             
             <button 
               type="submit" 
-              className="w-full bg-purple-600 text-white py-2 px-4 rounded-full font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-500 hover:to-purple-700 hover:shadow-md active:transform active:scale-95"
-              onClick={handleContinueQuest}
+              className={`w-full bg-purple-600 text-white py-2 px-4 rounded-full font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-purple-500 hover:to-purple-700 hover:shadow-md active:transform active:scale-95 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              disabled={loading}
             >
-              Continue Quest
+              {loading ? 'Embarking...' : 'Continue Quest'}
             </button>
             
             <button 
@@ -211,8 +232,8 @@ const LoginPage = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               New to HabitQuest? 
-              <Link to="/signup">
-              <a href="#" className="ml-1 text-purple-600 hover:underline">Start your journey</a>
+              <Link to="/signup" className="ml-1 text-purple-600 hover:underline">
+                Start your journey
               </Link>
             </p>
           </div>

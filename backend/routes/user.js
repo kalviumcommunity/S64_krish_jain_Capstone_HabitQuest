@@ -2,8 +2,60 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const auth = require("../middleware/auth");
 
-router.get("/", async (req, res) => {
+// Login route
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: "Please provide both email and password" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: "We couldn't find an account with that email. Please check your email or sign up if you're new!" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "The password you entered is incorrect. Please try again." });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(200).json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        profilePicture: user.profilePicture
+      }
+    });
+  } catch (error) {
+    console.error("❌ Login error:", error.message);
+    res.status(500).json({ error: "An error occurred. Please try again later." });
+  }
+});
+
+// Get current user profile (protected route)
+router.get("/me", auth, async (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all users (protected route)
+router.get("/", auth, async (req, res) => {
   try {
     const users = await User.find().populate("habits");
     res.status(200).json(users);
@@ -12,7 +64,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+// Get user by ID (protected route)
+router.get("/:id", auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate("habits");
     if (!user) {
@@ -25,23 +78,59 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Register new user
 router.post("/", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    
+    // Validate required fields
     if (!name || !email || !password) {
-      return res.status(400).json({ error: "All fields are required." });
+      return res.status(400).json({ error: "Please provide all required fields" });
     }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "This email is already registered. Please try logging in instead." });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
-    res.status(201).json({ message: "User created successfully", user: newUser });
+    
+    // Generate token for the new user
+    const token = jwt.sign(
+      { userId: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(201).json({ 
+      message: "Welcome to HabitQuest! Your account has been created successfully.",
+      token,
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        profilePicture: newUser.profilePicture
+      }
+    });
   } catch (error) {
     console.error("❌ Error creating user:", error.message);
-    res.status(500).json({ error: "Failed to create user" });
+    if (error.code === 11000) { // MongoDB duplicate key error
+      return res.status(400).json({ error: "This email is already registered. Please try logging in instead." });
+    }
+    res.status(500).json({ error: "Failed to create account. Please try again later." });
   }
 });
 
-router.put("/:id", async (req, res) => {
+// Update user (protected route)
+router.put("/:id", auth, async (req, res) => {
   try {
     const { name, email } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
@@ -58,7 +147,8 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id/password", async (req, res) => {
+// Update password (protected route)
+router.put("/:id/password", auth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const user = await User.findById(req.params.id);
@@ -83,7 +173,8 @@ router.put("/:id/password", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+// Delete user (protected route)
+router.delete("/:id", auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     

@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const Habit = require("../models/Habit");
 const Streak = require("../models/Streak");
-const { isAuthenticated } = require("../middleware/auth");
+const auth = require("../middleware/auth");
 const axios = require("axios");
 
 // Get all habits
-router.get("/", isAuthenticated, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     const habits = await Habit.find({ userId: req.user._id });
     res.status(200).json(habits);
@@ -16,7 +16,7 @@ router.get("/", isAuthenticated, async (req, res) => {
 });
 
 // Get specific habit
-router.get("/:id", isAuthenticated, async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   try {
     const habit = await Habit.findOne({
       _id: req.params.id,
@@ -30,7 +30,7 @@ router.get("/:id", isAuthenticated, async (req, res) => {
 });
 
 // Create new habit
-router.post("/", isAuthenticated, async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const { name, frequency = "daily" } = req.body;
     
@@ -62,7 +62,7 @@ router.post("/", isAuthenticated, async (req, res) => {
 });
 
 // Update habit completion status
-router.post("/:id/complete", isAuthenticated, async (req, res) => {
+router.post("/:id/complete", auth, async (req, res) => {
   try {
     const habit = await Habit.findOne({
       _id: req.params.id,
@@ -144,7 +144,7 @@ router.post("/:id/complete", isAuthenticated, async (req, res) => {
 });
 
 // Update habit details
-router.put("/:id", isAuthenticated, async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     const { name, frequency } = req.body;
     
@@ -174,7 +174,7 @@ router.put("/:id", isAuthenticated, async (req, res) => {
 });
 
 // Delete habit
-router.delete("/:id", isAuthenticated, async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const habit = await Habit.findOneAndDelete({
       _id: req.params.id,

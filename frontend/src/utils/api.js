@@ -8,6 +8,7 @@ export const loginUser = async (email, password) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ email, password }),
+      credentials: 'include' // Important for cookies
     });
 
     const data = await response.json();
@@ -15,10 +16,6 @@ export const loginUser = async (email, password) => {
     if (!response.ok) {
       throw new Error(data.error);
     }
-
-    // Store the token in localStorage
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
 
     return data;
   } catch (error) {
@@ -34,6 +31,7 @@ export const registerUser = async (name, email, password) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ name, email, password }),
+      credentials: 'include' // Important for cookies
     });
 
     const data = await response.json();
@@ -48,16 +46,35 @@ export const registerUser = async (name, email, password) => {
   }
 };
 
-export const logoutUser = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+export const logoutUser = async () => {
+  try {
+    await fetch(`${API_URL}/users/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};
+
+// Store user data in memory during session
+let currentUser = null;
+
+export const setCurrentUser = (user) => {
+  currentUser = user;
 };
 
 export const getCurrentUser = () => {
-  const user = localStorage.getItem('user');
-  return user ? JSON.parse(user) : null;
+  return currentUser;
 };
 
-export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
+export const isAuthenticated = async () => {
+  try {
+    const response = await fetch(`${API_URL}/users/me`, {
+      credentials: 'include'
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }; 

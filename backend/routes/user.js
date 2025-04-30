@@ -27,11 +27,18 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '7d' }
     );
 
+    // Set JWT as HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Only send cookie over HTTPS in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.status(200).json({
-      token,
       user: {
         _id: user._id,
         name: user.name,
@@ -103,16 +110,22 @@ router.post("/", async (req, res) => {
     const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
     
-    // Generate token for the new user
     const token = jwt.sign(
       { userId: newUser._id },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '7d' }
     );
+
+    // Set JWT as HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(201).json({ 
       message: "Welcome to HabitQuest! Your account has been created successfully.",
-      token,
       user: {
         _id: newUser._id,
         name: newUser.name,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from "../assets/logo.png"
 import { registerUser, setCurrentUser } from '../utils/api';
-
+import ProfileImageUpload from '../components/ProfileImageUpload';
 
 const QuestSignupForm = () => {
   const navigate = useNavigate();
@@ -24,6 +24,13 @@ const QuestSignupForm = () => {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleImageChange = (file) => {
+    setFormData(prev => ({
+      ...prev,
+      profileImage: file
     }));
   };
 
@@ -53,7 +60,7 @@ const QuestSignupForm = () => {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('heroName', formData.heroName);
+      formDataToSend.append('name', formData.heroName);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('password', formData.password);
       if (formData.profileImage) {
@@ -101,6 +108,7 @@ const QuestSignupForm = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
+              
               <div>
                 <label htmlFor="heroName" className="block text-sm font-medium text-gray-700 mb-1">
                   Hero Name
@@ -199,6 +207,12 @@ const QuestSignupForm = () => {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div className="my-6">
+                <ProfileImageUpload 
+                  onImageChange={handleImageChange}
+                />
               </div>
 
               <div className="flex items-start">

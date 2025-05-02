@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Logo from "../assets/logo.png"
 import { registerUser, setCurrentUser } from '../utils/api';
 
+
 const QuestSignupForm = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -12,7 +13,8 @@ const QuestSignupForm = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    agreeToTerms: false
+    agreeToTerms: false,
+    profileImage: null
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,10 +52,16 @@ const QuestSignupForm = () => {
     setLoading(true);
 
     try {
-      const data = await registerUser(formData.heroName, formData.email, formData.password);
-      // Store user data in memory
+      const formDataToSend = new FormData();
+      formDataToSend.append('heroName', formData.heroName);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      if (formData.profileImage) {
+        formDataToSend.append('profileImage', formData.profileImage);
+      }
+
+      const data = await registerUser(formDataToSend);
       setCurrentUser(data.user);
-      // Redirect to dashboard after successful registration
       navigate('/dashboard');
     } catch (error) {
       if (error.message.includes('duplicate')) {

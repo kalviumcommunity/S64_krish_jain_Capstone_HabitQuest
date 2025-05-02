@@ -4,6 +4,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
+const upload = require("../middleware/upload");
 
 // Login route
 router.post("/login", async (req, res) => {
@@ -86,7 +87,7 @@ router.get("/:id", auth, async (req, res) => {
 });
 
 // Register new user
-router.post("/", async (req, res) => {
+router.post("/", upload.single('profileImage'), async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
@@ -107,7 +108,15 @@ router.post("/", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
+    
+    // Create user with profile picture if uploaded
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      profilePicture: req.file ? `/uploads/${req.file.filename}` : undefined
+    });
+    
     await newUser.save();
     
     const token = jwt.sign(

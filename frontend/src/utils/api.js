@@ -23,14 +23,11 @@ export const loginUser = async (email, password) => {
   }
 };
 
-export const registerUser = async (name, email, password) => {
+export const registerUser = async (formData) => {
   try {
     const response = await fetch(`${API_URL}/users`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
+      body: formData,
       credentials: 'include' // Important for cookies
     });
 
